@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Life Coach</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #f0efe9;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --text: #1a1918;
+    --text-2: #5c5a55;
+    --text-3: #9a9890;
+    --accent: #c96442;
+    --accent-bg: #fdf0eb;
+    --accent-text: #9b3d1c;
+    --success: #2d7a4f;
+    --success-bg: #eaf5ee;
+    --warning: #92600e;
+    --warning-bg: #fdf3e0;
+    --danger: #b03030;
+    --danger-bg: #fdeaea;
+    --radius: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1d1b;
+      --surface-2: #252320;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text: #f0eeea;
+      --text-2: #a8a69f;
+      --text-3: #6a6860;
+      --accent-bg: #2a1a12;
+      --accent-text: #e8956c;
+      --success-bg: #102218;
+      --warning-bg: #1f1608;
+      --danger-bg: #220f0f;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .layout {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    gap: 1rem;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+
+  /* ── Streak card ── */
+  .streak-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .streak-left { display: flex; align-items: center; gap: 12px; }
+  .streak-icon {
+    width: 40px; height: 40px;
+    background: var(--accent-bg);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    color: var(--accent);
+  }
+  .streak-num { font-size: 24px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .streak-label { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .streak-dots { display: flex; gap: 5px; }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 0.5px solid var(--border);
+  }
+  .dot.done { background: var(--accent); border-color: var(--accent); }
+  .dot.today { background: var(--accent-bg); border: 2px solid var(--accent); }
+
+  /* ── Check-in banner ── */
+  .checkin-banner {
+    background: var(--accent-bg);
+    border: 0.5px solid rgba(201,100,66,0.2);
+    border-radius: 12px;
+    padding: 0.875rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--accent-text);
+  }
+  .checkin-banner i { font-size: 18px; flex-shrink: 0; }
+  .checkin-banner.done {
+    background: var(--success-bg);
+    border-color: rgba(45,122,79,0.2);
+    color: var(--success);
+  }
+  .checkin-banner.done i { color: var(--success); }
+
+  /* ── Input area ── */
+  .input-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .input-card textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: var(--text);
+    font-family: inherit;
+    resize: none;
+    line-height: 1.6;
+    min-height: 90px;
+  }
+  .input-card textarea::placeholder { color: var(--text-3); }
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    border-top: 0.5px solid var(--border);
+    padding-top: 10px;
+  }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ex-chip {
+    font-size: 12px;
+    color: var(--text-2);
+    border: 0.5px solid var(--border-strong);
+    border-radius: 99px;
+    padding: 3px 10px;
+    cursor: pointer;
+    background: var(--surface-2);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .ex-chip:hover { background: var(--bg); }
+
+  .send-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .send-btn:hover:not(:disabled) { opacity: 0.88; }
+
+  /* ── Results ── */
+  .results { display: none; flex-direction: column; gap: 1rem; }
+  .results.visible { display: flex; }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .card-label i { font-size: 14px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* mood */
+  .mood-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .mood-badge {
+    font-size: 13px; font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 99px;
+    background: var(--accent-bg);
+    color: var(--accent-text);
+  }
+  .mood-bar-wrap {
+    flex: 1; height: 5px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .mood-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .body-text { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+  /* tasks */
+  .tasks-list { display: flex; flex-direction: column; gap: 6px; }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+  .task-pill {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pill-high { background: var(--danger-bg); color: var(--danger); }
+  .pill-med  { background: var(--warning-bg); color: var(--warning); }
+  .pill-low  { background: var(--success-bg); color: var(--success); }
+  .task-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+
+  /* first move */
+  .first-move-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+    border-left: 3px solid var(--accent);
+    padding-left: 12px;
+  }
+
+  .reset-btn {
+    font-size: 13px;
+    color: var(--text-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    align-self: flex-start;
+  }
+  .reset-btn:hover { color: var(--text-2); }
+
+  /* loading dots */
+  .dots { display: inline-flex; gap: 3px; margin-left: 4px; }
+  .dots span {
+    width: 4px; height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    animation: blink 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+  @media (max-width: 520px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .streak-dots { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="header">
+    <div class="header-left">
+      <h1><i class="ti ti-brain" style="color:var(--accent);vertical-align:-2px;margin-right:6px"></i>AI life coach</h1>
+      <p>Tell me what's on your mind — goals, stress, tasks, anything.</p>
+    </div>
+  </div>
+
+  <!-- Streak tracker -->
+  <div class="streak-card">
+    <div class="streak-left">
+      <div class="streak-icon"><i class="ti ti-flame"></i></div>
+      <div>
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-label">day streak</div>
+      </div>
+    </div>
+    <div class="streak-dots" id="streakDots"></div>
+  </div>
+
+  <!-- Check-in banner -->
+  <div class="checkin-banner" id="checkinBanner">
+    <i class="ti ti-sun"></i>
+    <span id="checkinMsg">You haven't checked in today yet. Let's go!</span>
+  </div>
+
+  <!-- Input -->
+  <div class="input-card" id="inputCard">
+    <textarea id="userInput" placeholder="e.g. I have a big project due Friday, I haven't been sleeping well, and I keep skipping the gym..."></textarea>
+    <div class="input-footer">
+      <div class="examples">
+        <span class="ex-chip" onclick="fill(this)">Overwhelmed with deadlines</span>
+        <span class="ex-chip" onclick="fill(this)">Want to get fit but keep procrastinating</span>
+        <span class="ex-chip" onclick="fill(this)">Feeling stuck in my career</span>
+      </div>
+      <button class="send-btn" id="analyzeBtn" onclick="analyze()">
+        Analyze <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label"><i class="ti ti-mood-smile"></i> Mood read</div>
+        <div class="mood-row">
+          <div class="mood-badge" id="moodLabel">—</div>
+          <div class="mood-bar-wrap"><div class="mood-bar" id="moodBar"></div></div>
+        </div>
+        <p class="body-text" id="moodNote"></p>
+      </div>
+      <div class="card">
+        <div class="card-label"><i class="ti ti-bulb"></i> Key insight</div>
+        <p class="body-text" id="insightText"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-list-check"></i> Prioritized action plan</div>
+      <div class="tasks-list" id="tasksList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-rocket"></i> First move — next 30 minutes</div>
+      <p class="first-move-text" id="firstMove"></p>
+    </div>
+
+    <button class="reset-btn" onclick="reset()">← Analyze something else</button>
+  </div>
+
+</div>
+
+<script>
+// ── Storage helpers ──────────────────────────────────────
+function getStore() {
+  try { return JSON.parse(localStorage.getItem('lifecoach') || '{}'); } catch { return {}; }
+}
+function setStore(data) {
+  try { localStorage.setItem('lifecoach', JSON.stringify(data)); } catch {}
+}
+
+// ── Date helpers ──────────────────────────────────────────
+function today() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+
+// ── Streak logic ──────────────────────────────────────────
+function initStreak() {
+  const s = getStore();
+  const t = today();
+
+  // Compute current streak
+  let streak = s.streak || 0;
+  const last = s.lastCheckin;
+
+  if (last) {
+    const diff = daysBetween(last, t);
+    if (diff === 0) {
+      // already checked in today — keep streak
+    } else if (diff === 1) {
+      // will extend when they check in
+    } else {
+      // missed a day — reset
+      streak = 0;
+      s.streak = 0;
+      setStore(s);
+    }
+  }
+
+  document.getElementById('streakNum').textContent = streak;
+  renderDots(streak, last === t);
+
+  // Update banner
+  if (last === t) {
+    const banner = document.getElementById('checkinBanner');
+    banner.classList.add('done');
+    banner.querySelector('i').className = 'ti ti-circle-check';
+    document.getElementById('checkinMsg').textContent =
+      `Checked in today! Streak: ${streak} day${streak !== 1 ? 's' : ''} 🔥`;
+  }
+}
+
+function renderDots(streak, checkedToday) {
+  const wrap = document.getElementById('streakDots');
+  wrap.innerHTML = '';
+  const days = ['M','T','W','T','F','S','S'];
+  const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0
+
+  days.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < todayIdx) {
+      // Past days — mark as done if within streak window
+      if (streak > (todayIdx - i) && (checkedToday || i < todayIdx)) dot.classList.add('done');
+    } else if (i === todayIdx) {
+      dot.classList.add(checkedToday ? 'done' : 'today');
+    }
+    wrap.appendChild(dot);
+  });
+}
+
+function markCheckinDone() {
+  const s = getStore();
+  const t = today();
+  if (s.lastCheckin === t) return; // already done
+
+  const last = s.lastCheckin;
+  let streak = s.streak || 0;
+
+  if (last) {
+    const diff = daysBetween(last, t);
+    streak = diff === 1 ? streak + 1 : 1;
+  } else {
+    streak = 1;
+  }
+
+  s.streak = streak;
+  s.lastCheckin = t;
+  setStore(s);
+
+  document.getElementById('streakNum').textContent = streak;
+  renderDots(streak, true);
+
+  const banner = document.getElementById('checkinBanner');
+  banner.classList.add('done');
+  banner.querySelector('i').className = 'ti ti-circle-check';
+  document.getElementById('checkinMsg').textContent =
+    `Checked in today! Streak: ${streak} day${streak !== 1 ? 's' : ''} 🔥`;
+}
+
+// ── UI helpers ────────────────────────────────────────────
+function fill(el) {
+  document.getElementById('userInput').value = el.textContent;
+}
+
+function reset() {
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('inputCard').style.display = 'block';
+  document.querySelector('.examples').parentElement.parentElement.style.display = 'block';
+  document.getElementById('userInput').value = '';
+}
+
+// ── Main analyze ──────────────────────────────────────────
+async function analyze() {
+  const input = document.getElementById('userInput').value.trim();
+  if (!input) return;
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = 'Thinking <span class="dots"><span></span><span></span><span></span></span>';
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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',
+        'HTTP-Referer': 'https://mindflow-app.github.io',
+        'X-Title': 'MindFlow'
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-haiku-4-5',
+        max_tokens: 1000,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a warm, direct AI life coach. Analyze the user's situation and respond ONLY with a valid JSON object — no markdown, no backticks, no explanation outside the JSON.
+
+Return exactly this shape:
+{
+  "mood": "one word (e.g. Stressed, Scattered, Motivated, Anxious, Hopeful)",
+  "moodScore": <0-100, where 100 = very positive>,
+  "moodNote": "1 sentence explaining the mood read",
+  "insight": "1-2 sentences: the single most important observation about their situation",
+  "tasks": [
+    { "text": "specific actionable task", "priority": "high" },
+    { "text": "specific actionable task", "priority": "med" },
+    { "text": "specific actionable task", "priority": "med" },
+    { "text": "specific actionable task", "priority": "low" }
+  ],
+  "firstMove": "The single most important thing they should do in the next 30 minutes. Be specific and warm."
+}`
+          },
+          { role: 'user', content: input }
+        ]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.choices[0].message.content;
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const p = JSON.parse(clean);
+
+    document.getElementById('moodLabel').textContent = p.mood;
+    setTimeout(() => {
+      document.getElementById('moodBar').style.width = p.moodScore + '%';
+    }, 100);
+    document.getElementById('moodNote').textContent = p.moodNote;
+    document.getElementById('insightText').textContent = p.insight;
+    document.getElementById('firstMove').textContent = p.firstMove;
+
+    const list = document.getElementById('tasksList');
+    list.innerHTML = '';
+    for (const t of p.tasks) {
+      const cls = t.priority === 'high' ? 'pill-high' : t.priority === 'med' ? 'pill-med' : 'pill-low';
+      const div = document.createElement('div');
+      div.className = 'task-item';
+      div.innerHTML = `<span class="task-pill ${cls}">${t.priority}</span><span class="task-text">${t.text}</span>`;
+      list.appendChild(div);
+    }
+
+    document.getElementById('inputCard').style.display = 'none';
+    document.getElementById('results').classList.add('visible');
+    markCheckinDone();
+
+  } catch (e) {
+    alert('Something went wrong. Check your API key or try again.');
+    console.error(e);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Analyze <i class="ti ti-arrow-right"></i>';
+}
+
+// ── Init ──────────────────────────────────────────────────
+initStreak();
+
+// Allow Enter+Shift for newlines, Enter alone to submit
+document.getElementById('userInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); analyze(); }
+});
+</script>
+</body>
+</html>
